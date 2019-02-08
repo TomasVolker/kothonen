@@ -1,169 +1,61 @@
 package numeriko.som
 
 
-import org.openrndr.application
+import org.openrndr.*
 import org.openrndr.color.ColorRGBa
-import org.openrndr.draw.LineCap
-import org.openrndr.math.Vector2
+import org.openrndr.draw.isolated
+import org.openrndr.math.Matrix44
 import tomasvolker.numeriko.core.dsl.D
 import tomasvolker.numeriko.core.functions.times
 import tomasvolker.numeriko.core.interfaces.array1d.double.DoubleArray1D
-import tomasvolker.numeriko.core.interfaces.array1d.generic.indices
-import tomasvolker.numeriko.core.interfaces.array2d.double.DoubleArray2D
-import tomasvolker.numeriko.core.interfaces.array2d.generic.Array2D
-import tomasvolker.numeriko.core.interfaces.array2d.generic.forEachIndex
-import tomasvolker.numeriko.core.interfaces.array2d.generic.get
-import tomasvolker.numeriko.core.interfaces.factory.*
-import tomasvolker.numeriko.core.primitives.squared
-import tomasvolker.numeriko.core.primitives.sumDouble
+import tomasvolker.numeriko.core.interfaces.factory.nextGaussianArray1D
 import kotlin.math.PI
 import kotlin.math.cos
-import kotlin.math.exp
 import kotlin.math.sin
 import kotlin.random.Random
 
-fun <T> Array2D<T>.getOrNull(i0: Int, i1: Int): T? =
-        if (i0 in 0 until shape0 && i1 in 0 until shape1)
-            this[i0, i1]
-        else
-            null
-
-interface Topology{
-
-    val size: Int
-
-    fun support(nodeIndex: Int): Iterable<Int> = 0 until size
-
-    fun weight(from: Int, to: Int): Double
-
-}
-
-
-//interface GridTopology2D
-
-class CircleGaussianTopology(
-    override val size: Int,
-    val deviation: Double
-): Topology {
-
-    override fun weight(from: Int, to: Int): Double {
-        val angleFrom = 2 * PI * from.toDouble() / size
-        val angleTo = 2 * PI * to.toDouble() / size
-
-        val deltaX = cos(angleFrom)- cos(angleTo)
-        val deltaY = sin(angleFrom) - sin(angleTo)
-
-        return exp(-(deltaX.squared() + deltaY.squared()) / (2 * deviation))
-    }
-
-
-}
-
-
-
-
-
-
-
-fun build2DMap(
-    width: Int,
-    height: Int,
-    dimension: Int
-): SelfOrganizingMap {
-
-    val nodes = array2D(width, height) { i0, i1 ->
-
-        val x = 200.0 * i0.toDouble() / width
-        val y = 200.0 * i1.toDouble() / height
-
-        SelfOrganizingMap.Node(
-            inputVector = doubleArray1D(dimension) { i ->
-                when (i) {
-                    0 -> x
-                    1 -> y
-                    else -> 0.0
-                }
-            }
-        )
-    }
-
-    nodes.forEachIndex { i0, i1 ->
-        val node = nodes[i0, i1]
-
-        node.addNeighbor(
-            nodes.getOrNull(i0-1, i1),
-            weight = 0.5
-        )
-
-        node.addNeighbor(
-            nodes.getOrNull(i0, i1-1),
-            weight = 0.5
-        )
-
-        node.addNeighbor(
-            nodes.getOrNull(i0+1, i1),
-            weight = 0.5
-        )
-
-        node.addNeighbor(
-            nodes.getOrNull(i0, i1+1),
-            weight = 0.5
-        )
-
-    }
-
-    return SelfOrganizingMap(
-        graph = nodes.toList()
-    )
-}
-
-fun distanceSquared(vector1: DoubleArray1D, vector2: DoubleArray1D) =
-        sumDouble(vector1.indices) { i -> (vector1[i] - vector2[i]).squared() }
-
 class SelfOrganizingMap(
-    val graph: List<Node>,
-    var learningRate: Double = 0.1,
-    val topology: Topology
+    val topology: WeightedTopology,
+    val dimension: Int,
+    var learningRate: Double = 1.0
 ) {
+
+    val graph = List(topology.size) { i ->
+        Node(
+            index = i,
+            position = Random.nextGaussianArray1D(dimension)
+        )
+    }
 
     fun learn(input: DoubleArray1D) {
 
-        val closest = graph.minBy { distanceSquared(input, it.inputVector) } ?: error("empty graph")
+        val closest = graph.minBy { distanceSquared(input, it.position) } ?: error("empty graph")
 
-        val delta = input - closest.inputVector
+        val delta = input - closest.position
 
-        closest.inputVector += learningRate * delta
-
-        closest.neighborList.forEach { (node, weight) ->
-            node.inputVector += weight * learningRate * delta
+        topology.support(closest.index).forEach { index ->
+            graph[index].position += learningRate * topology.weight(closest.index, index) * delta
         }
 
     }
-
 
     data class Node(
-        var inputVector: DoubleArray1D,
-        val neighborList: MutableList<NodeWeight> = mutableListOf()
-    ) {
-
-        fun addNeighbor(node: Node?, weight: Double) {
-            node?.let { neighborList.add(NodeWeight(it, weight)) }
-        }
-
-    }
-
-    data class NodeWeight(
-        val node: Node,
-        val weight: Double
+        val index: Int,
+        var position: DoubleArray1D
     )
 
 }
 
 fun main() {
 
-    val map = build2DMap(
+    val topology = Grid2DGaussianTopology(
         width = 10,
         height = 10,
+        deviation = 100.0
+    )
+
+    val map = SelfOrganizingMap(
+        topology = topology,
         dimension = 2
     )
 
@@ -175,37 +67,66 @@ fun main() {
 
         program {
 
+            val font = Resources.fontImageMap("IBMPlexMono-Bold.ttf", 16.0)
+
             extend(PanZoom())
 
             extend(Grid2D())
 
+            keyboard.keyDown.listen {
+                when(it.key) {
+                    KEY_ARROW_UP -> topology.deviation *= 1.1
+                    KEY_ARROW_DOWN -> topology.deviation *= 0.9
+                    KEY_ARROW_RIGHT -> map.learningRate *= 1.1
+                    KEY_ARROW_LEFT -> map.learningRate *= 0.9
+                }
+            }
+
             extend {
 
-                repeat(20) {
-                    val radius = Random.nextDouble(100.0, 200.0)
-                    val angle = Random.nextDouble(0.0, 2 * PI)
 
-                    map.learn(D[100.0 + radius * cos(angle), 100.0 + radius * sin(angle)])
-                }
+                val radius = Random.nextDouble(0.0, 200.0)
+                val angle = Random.nextDouble(0.0, 2 * PI)
+
+                val point = D[100.0 + radius * cos(angle), 100.0 + radius * sin(angle)]
+
+                map.learn(point)
 
                 drawer.stroke = ColorRGBa.WHITE
                 drawer.fill = ColorRGBa.WHITE
                 drawer.strokeWeight = 1.0
-                drawer.lineCap = LineCap.BUTT
 
                 map.graph.forEach { node ->
-                    drawer.circle(x = node.inputVector[0], y = node.inputVector[1], radius = 10.0)
+                    drawer.circle(x = node.position[0], y = node.position[1], radius = 10.0)
 
-                    node.neighborList.forEach { neighbor ->
+                    topology.neighbors(node.index).map { map.graph[it] }.forEach { neighbor ->
 
                         drawer.lineSegment(
-                            x0 = node.inputVector[0],
-                            y0 = node.inputVector[1],
-                            x1 = neighbor.node.inputVector[0],
-                            y1 = neighbor.node.inputVector[1]
+                            x0 = node.position[0],
+                            y0 = node.position[1],
+                            x1 = neighbor.position[0],
+                            y1 = neighbor.position[1]
                         )
 
                     }
+
+                }
+
+                drawer.fill = ColorRGBa.RED
+                drawer.circle(x = point[0], y = point[1], radius = 5.0)
+
+                drawer.isolated {
+
+                    ortho()
+                    view = Matrix44.IDENTITY
+                    model = Matrix44.IDENTITY
+
+                    fontMap = font
+
+                    text(
+                        "deviation: ${topology.deviation}\nlearningRate: ${map.learningRate}",
+                        y = 16.0
+                    )
 
                 }
 

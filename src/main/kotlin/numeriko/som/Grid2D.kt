@@ -19,10 +19,6 @@ class Grid2D : Extension {
     var color = ColorRGBa.GRAY
     var strokeWeight = 1.0
 
-    val font by lazy {
-        Resources.fontImageMap("IBMPlexMono-Bold.ttf", 16.0)
-    }
-
     override fun beforeDraw(drawer: Drawer, program: Program) {
 
         drawer.stroke = color
@@ -59,12 +55,4 @@ class Grid2D : Extension {
 
     }
 
-    override fun afterDraw(drawer: Drawer, program: Program) {
-
-        val worldBounds = drawer.view.inversed * drawer.bounds
-
-
-
-
-    }
 }
