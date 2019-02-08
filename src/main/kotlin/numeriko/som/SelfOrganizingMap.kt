@@ -4,6 +4,7 @@ package numeriko.som
 import org.openrndr.application
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.LineCap
+import org.openrndr.math.Vector2
 import tomasvolker.numeriko.core.dsl.D
 import tomasvolker.numeriko.core.functions.times
 import tomasvolker.numeriko.core.interfaces.array1d.double.DoubleArray1D
@@ -176,6 +177,8 @@ fun main() {
 
             extend(PanZoom())
 
+            extend(Grid2D())
+
             extend {
 
                 repeat(20) {
@@ -184,8 +187,6 @@ fun main() {
 
                     map.learn(D[100.0 + radius * cos(angle), 100.0 + radius * sin(angle)])
                 }
-
-                drawer.background(ColorRGBa.BLACK)
 
                 drawer.stroke = ColorRGBa.WHITE
                 drawer.fill = ColorRGBa.WHITE
