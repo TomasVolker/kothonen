@@ -8,6 +8,7 @@ import tomasvolker.numeriko.core.dsl.D
 import tomasvolker.numeriko.core.functions.times
 import tomasvolker.numeriko.core.interfaces.array1d.double.DoubleArray1D
 import tomasvolker.numeriko.core.interfaces.array1d.generic.indices
+import tomasvolker.numeriko.core.interfaces.array2d.double.DoubleArray2D
 import tomasvolker.numeriko.core.interfaces.array2d.generic.Array2D
 import tomasvolker.numeriko.core.interfaces.array2d.generic.forEachIndex
 import tomasvolker.numeriko.core.interfaces.array2d.generic.get
@@ -16,6 +17,7 @@ import tomasvolker.numeriko.core.primitives.squared
 import tomasvolker.numeriko.core.primitives.sumDouble
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.exp
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -24,6 +26,43 @@ fun <T> Array2D<T>.getOrNull(i0: Int, i1: Int): T? =
             this[i0, i1]
         else
             null
+
+interface Topology{
+
+    val size: Int
+
+    fun support(nodeIndex: Int): Iterable<Int> = 0 until size
+
+    fun weight(from: Int, to: Int): Double
+
+}
+
+
+//interface GridTopology2D
+
+class CircleGaussianTopology(
+    override val size: Int,
+    val deviation: Double
+): Topology {
+
+    override fun weight(from: Int, to: Int): Double {
+        val angleFrom = 2 * PI * from.toDouble() / size
+        val angleTo = 2 * PI * to.toDouble() / size
+
+        val deltaX = cos(angleFrom)- cos(angleTo)
+        val deltaY = sin(angleFrom) - sin(angleTo)
+
+        return exp(-(deltaX.squared() + deltaY.squared()) / (2 * deviation))
+    }
+
+
+}
+
+
+
+
+
+
 
 fun build2DMap(
     width: Int,
@@ -82,7 +121,8 @@ fun distanceSquared(vector1: DoubleArray1D, vector2: DoubleArray1D) =
 
 class SelfOrganizingMap(
     val graph: List<Node>,
-    var learningRate: Double = 0.1
+    var learningRate: Double = 0.1,
+    val topology: Topology
 ) {
 
     fun learn(input: DoubleArray1D) {
