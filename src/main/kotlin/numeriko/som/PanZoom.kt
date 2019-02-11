@@ -1,5 +1,6 @@
 package numeriko.som
 
+import numeriko.openrndr.pipeTransforms
 import numeriko.openrndr.toHomogeneous
 import numeriko.openrndr.xy
 import org.openrndr.Extension
@@ -18,8 +19,8 @@ private class Camera2D {
 
     var view = Matrix44.IDENTITY
 
-    fun cameraToWorld(position: Vector2) = (view.inversed * position.vector3().toHomogeneous()).xy
-    fun worldToCamera(position: Vector2) = (view * position.vector3().toHomogeneous()).xy
+    fun cameraToWorld(position: Vector2) = (view.inversed * position.xy01).xy
+    fun worldToCamera(position: Vector2) = (view * position.xy01).xy
 
     fun mouseDragged(event: MouseEvent) {
         view *= transform { translate(event.dragDisplacement / view[0].x) }
@@ -28,10 +29,10 @@ private class Camera2D {
     fun mouseScrolled(event: MouseEvent) {
         val worldPosition = cameraToWorld(event.position)
 
-        view *= transform {
-            translate(worldPosition)
-            scale(exp(scrollSpeed * event.rotation.y))
-            translate(-worldPosition)
+        view *= pipeTransforms {
+            pivot(worldPosition) {
+                scale(exp(scrollSpeed * event.rotation.y))
+            }
         }
     }
 }
