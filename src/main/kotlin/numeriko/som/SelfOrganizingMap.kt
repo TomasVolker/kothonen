@@ -1,18 +1,10 @@
 package numeriko.som
 
 
-import org.openrndr.*
-import org.openrndr.color.ColorRGBa
-import org.openrndr.draw.isolated
-import org.openrndr.math.Matrix44
-import tomasvolker.numeriko.core.dsl.D
-import tomasvolker.numeriko.core.functions.normalized
+import numeriko.som.topology.WeightedTopology
 import tomasvolker.numeriko.core.functions.times
 import tomasvolker.numeriko.core.interfaces.array1d.double.DoubleArray1D
 import tomasvolker.numeriko.core.interfaces.factory.nextGaussianArray1D
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.random.Random
 
 class SelfOrganizingMap<out T: WeightedTopology>(

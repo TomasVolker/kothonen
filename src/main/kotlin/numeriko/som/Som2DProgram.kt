@@ -1,5 +1,8 @@
 package numeriko.som
 
+import numeriko.som.topology.GaussianTopology
+import numeriko.som.topology.Grid2DGaussianTopology
+import numeriko.som.topology.Topology
 import org.openrndr.*
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.Drawer
@@ -29,7 +32,7 @@ fun main() {
             width = 800
             height = 600
         },
-        program = SomProgram(
+        program = Som2DProgram(
             map = map,
             topology = map.topology
         )
@@ -38,7 +41,7 @@ fun main() {
 
 }
 
-class SomProgram(
+class Som2DProgram(
     val map: SelfOrganizingMap<GaussianTopology>,
     val topology: Topology
 ): Program() {
