@@ -1,5 +1,7 @@
 package numeriko.som
 
+import numeriko.openrndr.Grid2D
+import numeriko.openrndr.PanZoom
 import numeriko.som.topology.GaussianTopology
 import numeriko.som.topology.Grid2DGaussianTopology
 import numeriko.som.topology.Topology
@@ -15,7 +17,6 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 fun main() {
-
 
     val map = SelfOrganizingMap(
         topology = Grid2DGaussianTopology(

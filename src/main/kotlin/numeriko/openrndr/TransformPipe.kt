@@ -20,10 +20,10 @@ class TransformPipeBuilder {
 
     fun translate(offset: Vector3)= pipe(_translate(offset))
     fun translate(offset: Vector2) = pipe(_translate(offset.xy0))
-    fun translate(x:Double, y:Double, z:Double = 0.0) = pipe(_translate(Vector3(x, y, z)))
+    fun translate(x: Double, y: Double, z: Double = 0.0) = pipe(_translate(Vector3(x, y, z)))
 
-    fun scale(scale:Double) = pipe(_scale(scale, scale, scale))
-    fun scale(scaleX:Double, scaleY:Double, scaleZ:Double) = pipe(_scale(scaleX, scaleY, scaleZ))
+    fun scale(scale: Double) = pipe(_scale(scale, scale, scale))
+    fun scale(scaleX: Double, scaleY: Double, scaleZ: Double = 1.0) = pipe(_scale(scaleX, scaleY, scaleZ))
     fun scale(scale: Vector3) = pipe(_scale(scale.x, scale.y, scale.z))
 
     inline fun pivot(position: Vector2, block: TransformPipeBuilder.()->Unit) {

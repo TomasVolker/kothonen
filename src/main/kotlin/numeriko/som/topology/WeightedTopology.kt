@@ -1,9 +1,5 @@
 package numeriko.som.topology
 
-import tomasvolker.numeriko.core.primitives.modulo
-import tomasvolker.numeriko.core.primitives.squared
-import kotlin.math.*
-
 interface WeightedTopology {
 
     val size: Int

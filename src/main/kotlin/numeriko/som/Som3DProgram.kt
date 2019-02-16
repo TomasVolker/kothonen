@@ -1,9 +1,6 @@
 package numeriko.som
 
-import numeriko.som.topology.GaussianTopology
-import numeriko.som.topology.Grid2DGaussianTopology
-import numeriko.som.topology.Grid3DGaussianTopology
-import numeriko.som.topology.Topology
+import numeriko.som.topology.*
 import org.openrndr.*
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.Drawer
