@@ -28,7 +28,7 @@ fun main() = application(
         width = 800
         height = 800
     },
-    program = MnistProgram("data/digit4_16x16_test.txt")
+    program = MnistProgram("data/digit4_16x16_learn.txt")
 )
 
 class MnistProgram(

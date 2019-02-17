@@ -9,7 +9,7 @@ import org.openrndr.*
 import tomasvolker.numeriko.core.interfaces.factory.nextDoubleArray1D
 import kotlin.random.Random
 
-fun main() {
+fun question1() {
 
     val map = SelfOrganizingMap(
         topology = Grid2DGaussianTopology(

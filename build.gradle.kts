@@ -5,8 +5,8 @@ plugins {
     kotlin("jvm") version "1.3.20"
 }
 
-group = "numeriko"
-version = "0.1"
+group = "volkerandreasen"
+version = "1.0"
 
 repositories {
     mavenCentral()
@@ -44,10 +44,31 @@ dependencies {
 
 application {
 
-    mainClassName = ""
+    mainClassName = "numeriko.som.program.MainKt"
     
     if (openrndrOS == "macos")
         applicationDefaultJvmArgs += "-XstartOnFirstThread"
 
+}
+
+val fatJar = task<Jar>("fatJar") {
+    baseName = "${project.name}-fat"
+    manifest {
+        attributes["Main-Class"] = "numeriko.som.program.MainKt"
+    }
+    from(configurations.runtime.map { if (it.isDirectory) it else zipTree(it) })
+    with(tasks["jar"] as CopySpec)
+}
+
+val buildExecutable = task<Copy>("buildExecutable") {
+    from(fatJar)
+    into("./")
+    rename(".*", "kothonen-1.0.jar")
+}
+
+tasks {
+    "build" {
+        dependsOn(buildExecutable)
+    }
 }
 
