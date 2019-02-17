@@ -44,7 +44,7 @@ dependencies {
 
 application {
 
-    mainClassName = "numeriko.som.program.MainKt"
+    mainClassName = "volkerandreasen.som.program.MainKt"
     
     if (openrndrOS == "macos")
         applicationDefaultJvmArgs += "-XstartOnFirstThread"
@@ -54,7 +54,7 @@ application {
 val fatJar = task<Jar>("fatJar") {
     baseName = "${project.name}-fat"
     manifest {
-        attributes["Main-Class"] = "numeriko.som.program.MainKt"
+        attributes["Main-Class"] = "volkerandreasen.som.program.MainKt"
     }
     from(configurations.runtime.map { if (it.isDirectory) it else zipTree(it) })
     with(tasks["jar"] as CopySpec)
