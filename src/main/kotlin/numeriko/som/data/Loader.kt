@@ -1,5 +1,6 @@
 package numeriko.som.data
 
+import numeriko.som.Resources
 import tomasvolker.numeriko.core.dsl.D
 import tomasvolker.numeriko.core.interfaces.array1d.double.DoubleArray1D
 import tomasvolker.numeriko.core.interfaces.array2d.double.DoubleArray2D
@@ -15,21 +16,21 @@ import kotlin.random.Random
 fun squareData() = List(1000) { Random.nextDoubleArray1D(2, 0.25, 0.75) }
 
 fun discData() = List(1000) {
-    val radius = /*sqrt(Random.nextDouble())*/Random.nextDouble()
+    val radius = /*sqrt(Random.nextDouble())*/Random.nextDouble(0.5)
     val angle = Random.nextDouble(2 * PI)
     D[radius * cos(angle), radius * sin(angle)]
 }
 
 
-fun fileData(path: String): List<DoubleArray1D> =
-    File(path).useLines { lines ->
+fun fileData(name: String): List<DoubleArray1D> =
+    File(Resources.url(name).substringAfter(':')).useLines { lines ->
         lines.drop(3).map {
             it.split(" ").map { it.toDouble() }.take(2).toDoubleArray1D()
         }.toList()
     }
 
-fun loadMnist(path: String): List<DoubleArray2D> =
-    File(path).useLines { lines ->
+fun loadMnist(name: String): List<DoubleArray2D> =
+    File(Resources.url(name).substringAfter(':')).useLines { lines ->
         lines.drop(3)
             .filter { it.isNotBlank() }
             .map {

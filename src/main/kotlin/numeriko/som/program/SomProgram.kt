@@ -20,7 +20,9 @@ import tomasvolker.numeriko.core.interfaces.array1d.double.DoubleArray1D
 class SomProgram(
     val training: SOMTraining,
     val topology: Topology,
-    val dataset: Collection<DoubleArray1D> = emptyList()
+    val dataset: Collection<DoubleArray1D> = emptyList(),
+    val nodeRadius: Double = 0.01,
+    val dataRadius: Double = 0.005
 ): Program() {
 
     val font by lazy { Resources.fontImageMap("IBMPlexMono-Bold.ttf", 16.0) }
@@ -80,7 +82,7 @@ class SomProgram(
 
         stroke = ColorRGBa.GREEN.shade(0.3).opacify(0.4)
         dataset.forEach { point ->
-            circle(x = point[0], y = point[1], radius = 0.01)
+            circle(x = point[0], y = point[1], radius = dataRadius)
         }
 
     }
@@ -98,7 +100,7 @@ class SomProgram(
             circle(
                 x = it.position[0],
                 y = it.position[1],
-                radius = 0.02
+                radius = nodeRadius
             )
         }
     }

@@ -2,24 +2,50 @@ package numeriko.som.program
 
 import numeriko.som.*
 import numeriko.som.data.discData
+import numeriko.som.grid.Grid1DGaussianTopology
 import numeriko.som.grid.Grid2DGaussianTopology
 import numeriko.som.sequence.asShuffledSequence
 import numeriko.som.sequence.exponentialSequence
+import numeriko.som.topology.GaussianTopology
+import numeriko.som.topology.Topology
 import org.openrndr.*
+import tomasvolker.numeriko.core.interfaces.array1d.double.DoubleArray1D
 import tomasvolker.numeriko.core.interfaces.factory.nextDoubleArray1D
 import kotlin.random.Random
 
-fun question1() {
+fun somOnDisc1D() {
 
-    val map = SelfOrganizingMap(
-        topology = Grid2DGaussianTopology(
-            width = 10,
-            height = 10
-        ),
-        initializer = { Random.nextDoubleArray1D(2, 0.25, 0.75) }
+    runSom(
+        data = discData(),
+        map = SelfOrganizingMap(
+            topology = Grid1DGaussianTopology(
+                size = 10
+            ),
+            initializer = { Random.nextDoubleArray1D(2) }
+        )
     )
 
-    val data = discData()
+}
+
+fun somOnDisc2D() {
+
+    runSom(
+        data = discData(),
+        map = SelfOrganizingMap(
+            topology = Grid2DGaussianTopology(
+                width = 10,
+                height = 10
+            ),
+            initializer = { Random.nextDoubleArray1D(2) }
+        )
+    )
+
+}
+
+fun runSom(
+    data: List<DoubleArray1D>,
+    map: SelfOrganizingMap<GaussianTopology>
+) {
 
     application(
         configuration = configuration {
@@ -35,7 +61,7 @@ fun question1() {
                 dataSource = data.asShuffledSequence(),
                 maxIterations = 1000
             ),
-            topology = map.topology,
+            topology = map.topology as Topology,
             dataset = data
         )
     )

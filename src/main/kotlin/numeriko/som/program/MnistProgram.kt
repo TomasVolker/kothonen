@@ -23,12 +23,12 @@ import tomasvolker.numeriko.core.interfaces.factory.nextDoubleArray1D
 import tomasvolker.numeriko.core.performance.forEach
 import kotlin.random.Random
 
-fun main() = application(
+fun somOnMnist() = application(
     configuration = configuration {
         width = 800
         height = 800
     },
-    program = MnistProgram("data/digit4_16x16_learn.txt")
+    program = MnistProgram("digit4_16x16_learn.txt")
 )
 
 class MnistProgram(
