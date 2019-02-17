@@ -10,7 +10,7 @@ import org.openrndr.math.Vector2
 import org.openrndr.math.transforms.transform
 import kotlin.math.exp
 
-private class Camera2D {
+class Camera2D {
 
     var scrollSpeed: Double = 0.1
     var zoomDragSpeed: Double = 0.002
@@ -25,7 +25,6 @@ private class Camera2D {
         object Pan: State()
         class Zoom(val pivot: Vector2): State()
     }
-
 
     var state: State = State.Idle
 
@@ -50,7 +49,6 @@ private class Camera2D {
 
         view *= when(state) {
             is State.Pan -> transform {
-                //translate(delta / view[0].x)
                 translate((view.inversed * delta.xy0).xy)
             }
             is State.Zoom -> pipeTransforms {
@@ -81,7 +79,7 @@ class PanZoom : Extension {
 
     override var enabled: Boolean = true
 
-    private val camera = Camera2D()
+    val camera = Camera2D()
 
     override fun setup(program: Program) {
 

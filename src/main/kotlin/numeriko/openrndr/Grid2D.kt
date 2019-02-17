@@ -1,7 +1,5 @@
 package numeriko.openrndr
 
-import numeriko.openrndr.toHomogeneous
-import numeriko.openrndr.xy
 import org.openrndr.Extension
 import org.openrndr.Program
 import org.openrndr.color.ColorRGBa

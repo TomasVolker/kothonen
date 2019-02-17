@@ -1,89 +1,89 @@
-package numeriko.som
+package numeriko.som.program
 
-import numeriko.som.topology.*
+import numeriko.openrndr.Grid2D
+import numeriko.openrndr.PanZoom
+import numeriko.som.Resources
+import numeriko.som.SelfOrganizingMap
+import numeriko.som.topology.GaussianTopology
+import numeriko.som.topology.Grid2DGaussianTopology
+import numeriko.som.topology.Topology
 import org.openrndr.*
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.Drawer
 import org.openrndr.draw.isolated
-import org.openrndr.extensions.Debug3D
 import org.openrndr.math.Matrix44
-import org.openrndr.math.Vector2
-import org.openrndr.math.Vector3
-import org.openrndr.shape.LineSegment
 import tomasvolker.numeriko.core.dsl.D
-import tomasvolker.numeriko.core.functions.normalized
-import tomasvolker.numeriko.core.functions.times
-import tomasvolker.numeriko.core.interfaces.array1d.double.DoubleArray1D
-import tomasvolker.numeriko.core.interfaces.factory.nextGaussian
+import tomasvolker.numeriko.core.interfaces.factory.nextDoubleArray1D
 import kotlin.math.PI
-import kotlin.math.absoluteValue
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 
 fun main() {
 
-
     val map = SelfOrganizingMap(
         topology = Grid2DGaussianTopology(
             width = 10,
             height = 10,
-            deviation = 10.0
+            deviation = 100.0
         ),
-        dimension = 3
+        initializer = { Random.nextDoubleArray1D(2) }
     )
 
     application(
         configuration = configuration {
-            fullscreen = true
+            windowResizable = true
+            width = 800
+            height = 600
         },
-        program = Som3DProgram(
+        program = Som2DProgram(
             map = map,
             topology = map.topology
         )
     )
 
-
 }
 
-class Som3DProgram(
+class Som2DProgram(
     val map: SelfOrganizingMap<GaussianTopology>,
     val topology: Topology
 ): Program() {
 
     val font by lazy { Resources.fontImageMap("IBMPlexMono-Bold.ttf", 16.0) }
 
-    var point = D[0.0, 0.0, 0.0]
+    var point = D[0.0, 0.0]
 
     override fun setup() {
 
         backgroundColor = ColorRGBa.BLUE.shade(0.2)
 
-        extend(Debug3D())
+        extend(PanZoom())
 
-        //extend(Grid2D())
+        extend(Grid2D())
 
         extend { update() }
 
         keyboard.keyDown.listen { onKeyEvent(it) }
+        keyboard.keyRepeat.listen { onKeyEvent(it) }
 
     }
 
     fun onKeyEvent(event: KeyEvent) {
-
-        if (event.key == KEY_ESCAPE) application.exit()
-
-        when(event.key.toChar()) {
-            'W' -> map.topology.deviation *= 1.1
-            'S' -> map.topology.deviation *= 0.9
-            'D' -> map.learningRate *= 1.1
-            'A' -> map.learningRate *= 0.9
+        when(event.key) {
+            KEY_ARROW_UP -> map.topology.deviation *= 1.1
+            KEY_ARROW_DOWN -> map.topology.deviation *= 0.9
+            KEY_ARROW_RIGHT -> map.learningRate *= 1.1
+            KEY_ARROW_LEFT -> map.learningRate *= 0.9
+            //KEY_SPACEBAR -> update()
         }
     }
 
     fun update() {
 
-        point = 100.0 * Random.run { D[nextGaussian(), nextGaussian(), nextGaussian()] }.normalized()
+        val radius = Random.nextDouble(0.0, 200.0)
+        val angle = Random.nextDouble(0.0, 2 * PI)
+
+        point = D[100.0 + radius * cos(angle), 100.0 + radius * sin(angle)]
 
         map.learn(point)
 
@@ -107,7 +107,7 @@ class Som3DProgram(
 
     private fun Drawer.drawDomain() {
         fill = ColorRGBa.RED.shade(0.6).opacify(0.3)
-        circle(x = 0.0, y = 0.0, radius = 1.0)
+        circle(x = 100.0, y = 100.0, radius = 200.0)
     }
 
     private fun Drawer.drawNodes() {
@@ -117,30 +117,37 @@ class Som3DProgram(
 
         for (node in map.graph) {
 
+            circle(
+                x = node.position[0],
+                y = node.position[1],
+                radius = 10.0
+            )
+
             drawEdges(node)
 
         }
     }
 
-    fun DoubleArray1D.toVector3() = Vector3(this[0], this[1], this[2])
-    fun DoubleArray1D.toVector2() = Vector2(this[0], this[1])
-
     private fun Drawer.drawEdges(node: SelfOrganizingMap.Node) {
 
         val neighbors = topology.neighbors(node.index).map { i -> map.graph[i] }
 
-        neighbors.map { neighbor ->
-            listOf(
-                node.position.toVector3(),
-                neighbor.position.toVector3()
+        for (neighbor in neighbors) {
+
+            lineSegment(
+                x0 = node.position[0],
+                y0 = node.position[1],
+                x1 = neighbor.position[0],
+                y1 = neighbor.position[1]
             )
-        }.let { lineStrips(it) }
+
+        }
 
     }
 
     private fun Drawer.drawPoint() {
         fill = ColorRGBa.RED
-        circle(point.toVector2(), radius = 0.2)
+        circle(x = point[0], y = point[1], radius = 5.0)
     }
 
     private fun Drawer.drawParameters() {
