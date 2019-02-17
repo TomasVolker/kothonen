@@ -1,5 +1,7 @@
 # Kothonen
 
+![](img/som3d.gif)
+
 This repository contains an implementation of a Self Organizing Map
 (SOM) and some examples.
 
