@@ -1,19 +1,14 @@
 package numeriko.som.program
 
 import numeriko.som.*
-import numeriko.som.data.discData
 import numeriko.som.data.fileData
-import numeriko.som.grid.Grid1DGaussianTopology
 import numeriko.som.grid.Grid2DGaussianTopology
-import numeriko.som.sequence.asShuffledSequence
-import numeriko.som.sequence.exponentialSequence
-import org.openrndr.*
 import tomasvolker.numeriko.core.interfaces.factory.nextDoubleArray1D
 import kotlin.random.Random
 
 fun somOnSet1() {
 
-    runSom(
+    runSom2D(
         data = fileData("set1.txt"),
         map = SelfOrganizingMap(
             topology = Grid2DGaussianTopology(
@@ -28,7 +23,7 @@ fun somOnSet1() {
 
 fun somOnSet2() {
 
-    runSom(
+    runSom2D(
         data = fileData("set2.txt"),
         map = SelfOrganizingMap(
             topology = Grid2DGaussianTopology(
@@ -43,7 +38,7 @@ fun somOnSet2() {
 
 fun somOnXor() {
 
-    runSom(
+    runSom2D(
         data = fileData("set_xor.txt"),
         map = SelfOrganizingMap(
             topology = Grid2DGaussianTopology(

@@ -17,7 +17,7 @@ import org.openrndr.math.Matrix44
 import org.openrndr.math.transforms.ortho
 import tomasvolker.numeriko.core.interfaces.array1d.double.DoubleArray1D
 
-class SomProgram(
+class SomProgram2D(
     val training: SOMTraining,
     val topology: Topology,
     val dataset: Collection<DoubleArray1D> = emptyList(),

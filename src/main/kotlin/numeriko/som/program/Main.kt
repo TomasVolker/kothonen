@@ -6,7 +6,7 @@ fun readNumber(): Int {
 
         val number = readLine()?.toIntOrNull()
 
-        if (number != null && number in 1..7)
+        if (number != null && number in 1..8)
             return number
         else
             println("Invalid question number, try again:")
@@ -28,6 +28,7 @@ Select demo:
 5 - 2D map on set 2
 6 - 2D map on xor
 7 - 2D map on MNIST
+8 - 2D map on 3D Sphere
 """)
 
     when(readNumber()) {
@@ -38,6 +39,7 @@ Select demo:
         5 -> somOnSet2()
         6 -> somOnXor()
         7 -> somOnMnist()
+        8 -> somOnSphere()
     }
 
 }

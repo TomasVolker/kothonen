@@ -8,7 +8,7 @@ import kotlin.random.Random
 
 fun somOnSquare() {
 
-    runSom(
+    runSom2D(
         data = squareData(),
         map = SelfOrganizingMap(
             topology = Grid2DGaussianTopology(
