@@ -49,13 +49,6 @@ class SomProgram(
 
         extend { update() }
 
-        keyboard.keyDown.listen { onKeyEvent(it) }
-        keyboard.keyRepeat.listen { onKeyEvent(it) }
-
-    }
-
-    fun onKeyEvent(event: KeyEvent) {
-
     }
 
     fun update() {
