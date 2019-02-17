@@ -2,9 +2,12 @@ package numeriko.som.program
 
 import numeriko.openrndr.Grid2D
 import numeriko.openrndr.PanZoom
-import numeriko.som.*
-import numeriko.som.topology.*
-import org.openrndr.*
+import numeriko.som.Resources
+import numeriko.som.SOMTraining
+import numeriko.som.SelfOrganizingMap
+import numeriko.som.topology.Topology
+import org.openrndr.KeyEvent
+import org.openrndr.Program
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.DrawQuality
 import org.openrndr.draw.Drawer
@@ -12,53 +15,12 @@ import org.openrndr.draw.isolated
 import org.openrndr.extensions.Screenshots
 import org.openrndr.math.Matrix44
 import org.openrndr.math.transforms.ortho
-import tomasvolker.numeriko.core.dsl.D
 import tomasvolker.numeriko.core.interfaces.array1d.double.DoubleArray1D
-import tomasvolker.numeriko.core.interfaces.factory.nextDoubleArray1D
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.random.Random
-
-fun squareData() = List(1000) { Random.nextDoubleArray1D(2, 0.25, 0.75) }
-fun discData() = List(1000) {
-    val radius = /*sqrt(Random.nextDouble())*/Random.nextDouble()
-    val angle = Random.nextDouble(2 * PI)
-    D[radius * cos(angle), radius * sin(angle)]
-}
-
-fun main() {
-
-    val map = SelfOrganizingMap(
-        topology = Grid2DGaussianTopology(
-            width = 10,
-            height = 10
-        ),
-        initializer = { Random.nextDoubleArray1D(2, 0.25, 0.75) }
-    )
-
-    application(
-        configuration = configuration {
-            windowResizable = true
-            width = 800
-            height = 800
-        },
-        program = SomProgram(
-            training = SOMTraining(
-                som = map,
-                learningRateSequence = ExponentialSequence(0.5, 0.1, 1000),
-                deviationSequence = ExponentialSequence(3.0, 0.1, 1000),
-                dataSource = discData()
-            ),
-            topology = map.topology
-        )
-    )
-
-}
 
 class SomProgram(
     val training: SOMTraining,
-    val topology: Topology
+    val topology: Topology,
+    val dataset: Collection<DoubleArray1D> = emptyList()
 ): Program() {
 
     val font by lazy { Resources.fontImageMap("IBMPlexMono-Bold.ttf", 16.0) }
@@ -116,18 +78,14 @@ class SomProgram(
 
     private fun Drawer.drawDomain() {
 
-        (training.dataSource as? List<DoubleArray1D>)?.let { points ->
-            stroke = ColorRGBa.GREEN.shade(0.3).opacify(0.4)
-            points.forEach {
-                circle(x = it[0], y = it[1], radius = 0.01)
-            }
+        stroke = ColorRGBa.GREEN.shade(0.3).opacify(0.4)
+        dataset.forEach { point ->
+            circle(x = point[0], y = point[1], radius = 0.01)
         }
-
 
     }
 
     private fun Drawer.drawNodes() {
-
 
         stroke = ColorRGBa.BLUE
         training.som.graph.forEach {

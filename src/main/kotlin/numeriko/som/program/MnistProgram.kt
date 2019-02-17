@@ -1,13 +1,13 @@
 package numeriko.som.program
 
-import numeriko.openrndr.Grid2D
-import numeriko.openrndr.PanZoom
 import numeriko.openrndr.write
-import numeriko.som.ExponentialSequence
 import numeriko.som.Resources
 import numeriko.som.SOMTraining
 import numeriko.som.SelfOrganizingMap
-import numeriko.som.topology.Grid2DGaussianTopology
+import numeriko.som.data.loadMnist
+import numeriko.som.grid.Grid2DGaussianTopology
+import numeriko.som.sequence.asShuffledSequence
+import numeriko.som.sequence.exponentialSequence
 import org.openrndr.KeyEvent
 import org.openrndr.Program
 import org.openrndr.application
@@ -16,41 +16,29 @@ import org.openrndr.configuration
 import org.openrndr.draw.Drawer
 import org.openrndr.draw.colorBuffer
 import org.openrndr.draw.isolated
+import org.openrndr.extensions.Screenshots
 import org.openrndr.math.Matrix44
 import tomasvolker.numeriko.core.dsl.I
-import tomasvolker.numeriko.core.interfaces.array2d.double.DoubleArray2D
-import tomasvolker.numeriko.core.interfaces.factory.doubleArray2D
 import tomasvolker.numeriko.core.interfaces.factory.nextDoubleArray1D
 import tomasvolker.numeriko.core.performance.forEach
-import java.io.File
 import kotlin.random.Random
-
-fun loadMnist(path: String): List<DoubleArray2D> =
-    File(path).useLines { lines ->
-        lines.drop(3)
-            .filter { it.isNotBlank() }
-            .map {
-                val listOfList = it.split(" ").filter { it.isNotBlank() }.map { it.toDouble() }.chunked(16)
-                doubleArray2D(16, 16) { x, y -> listOfList[y][x] }
-            }.toList()
-    }
-
 
 fun main() = application(
     configuration = configuration {
         width = 800
         height = 800
     },
-    program = MnistProgram()
+    program = MnistProgram("data/digit4_16x16_test.txt")
 )
 
+class MnistProgram(
+    path: String
+): Program() {
 
-class MnistProgram: Program() {
+    val data = loadMnist(path)
 
-    val data = loadMnist("data/digit10_16x16_test.txt").repeat(10)
-
-    val mapWidth = 10
-    val mapHeight = 10
+    val mapWidth = 20
+    val mapHeight = 20
 
     val map = SelfOrganizingMap(
         topology = Grid2DGaussianTopology(
@@ -62,9 +50,10 @@ class MnistProgram: Program() {
 
     val training = SOMTraining(
         som = map,
-        learningRateSequence = ExponentialSequence(0.5, 0.1, 1000),
-        deviationSequence = ExponentialSequence(3.0, 0.1, 1000),
-        dataSource = data.map { it.linearView() }
+        learningRateSequence = exponentialSequence(0.5, 0.1, 2000),
+        deviationSequence = exponentialSequence(10.0, 0.1, 2000),
+        dataSource = data.map { it.linearView() }.asShuffledSequence(),
+        maxIterations = 2000
     )
 
     val font by lazy { Resources.fontImageMap("IBMPlexMono-Bold.ttf", 16.0) }
@@ -75,9 +64,7 @@ class MnistProgram: Program() {
 
         backgroundColor = ColorRGBa.BLUE.shade(0.2)
 
-        extend(PanZoom())
-
-        extend(Grid2D())
+        extend(Screenshots())
 
         extend { update() }
 
@@ -112,12 +99,21 @@ class MnistProgram: Program() {
 
         val graph = map.graph
 
+        val imageWidth = width.toDouble() / mapWidth
+        val imageHeight = height.toDouble() / mapHeight
+
         forEach(mapWidth, mapHeight) { x, y ->
 
             val position = graph[map.topology.toLinear(x, y)].position.withShape(I[16, 16]).as2D()
 
             buffer.write(position)
-            image(buffer, x = 16.0 * x, y = 16.0 * y)
+            image(
+                buffer,
+                x = imageWidth * x,
+                y = imageHeight * y,
+                width = imageWidth,
+                height = imageHeight
+            )
 
         }
 

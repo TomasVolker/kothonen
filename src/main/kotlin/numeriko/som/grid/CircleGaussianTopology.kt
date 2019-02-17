@@ -1,5 +1,7 @@
-package numeriko.som.topology
+package numeriko.som.grid
 
+import numeriko.som.topology.GaussianTopology
+import numeriko.som.topology.Topology
 import tomasvolker.numeriko.core.primitives.modulo
 import tomasvolker.numeriko.core.primitives.squared
 import kotlin.math.*

@@ -1,11 +1,11 @@
-package numeriko.som.program
+package numeriko.som.demo
 
 import numeriko.openrndr.Grid2D
 import numeriko.openrndr.PanZoom
 import numeriko.som.Resources
 import numeriko.som.SelfOrganizingMap
 import numeriko.som.topology.GaussianTopology
-import numeriko.som.topology.Grid2DGaussianTopology
+import numeriko.som.grid.Grid2DGaussianTopology
 import numeriko.som.topology.Topology
 import org.openrndr.*
 import org.openrndr.color.ColorRGBa

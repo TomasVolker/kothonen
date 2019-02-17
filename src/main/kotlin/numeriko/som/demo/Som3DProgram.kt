@@ -1,7 +1,8 @@
-package numeriko.som.program
+package numeriko.som.demo
 
 import numeriko.som.Resources
 import numeriko.som.SelfOrganizingMap
+import numeriko.som.grid.Grid2DGaussianTopology
 import numeriko.som.topology.*
 import org.openrndr.*
 import org.openrndr.color.ColorRGBa
