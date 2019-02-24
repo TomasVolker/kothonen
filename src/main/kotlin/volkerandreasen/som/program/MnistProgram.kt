@@ -34,7 +34,7 @@ class MnistProgram(
     path: String
 ): Program() {
 
-    val data = loadMnist(path)
+    val data = loadMnist(path).map { it.first }
 
     val mapWidth = 20
     val mapHeight = 20

@@ -12,6 +12,13 @@ class SelfOrganizingMap<out T: WeightedTopology>(
     val initializer: ()->DoubleArray1D
 ) {
 
+    // Node definition
+    data class Node(
+        val index: Int,
+        var position: DoubleArray1D
+    )
+
+    // Graph declaration
     val graph = List(topology.size) { i ->
         Node(
             index = i,
@@ -21,20 +28,18 @@ class SelfOrganizingMap<out T: WeightedTopology>(
 
     fun learn(input: DoubleArray1D) {
 
+        // Find closest node
         val closest = graph.minBy { distanceSquared(input, it.position) } ?: error("empty graph")
 
+        // For each neighbor of the closest node
         for(index in topology.support(closest.index)) {
             val node = graph[index]
-            val delta =input - node.position
+            val delta = input - node.position
+            // Update rule
             node.position += learningRate * topology.weight(closest.index, index) * delta
         }
 
     }
-
-    data class Node(
-        val index: Int,
-        var position: DoubleArray1D
-    )
 
 }
 
