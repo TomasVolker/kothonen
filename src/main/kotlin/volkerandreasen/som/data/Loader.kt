@@ -29,12 +29,14 @@ fun fileData(name: String): List<DoubleArray1D> =
         }.toList()
     }
 
-fun loadMnist(name: String): List<DoubleArray2D> =
+fun loadMnist(name: String): List<Pair<DoubleArray2D, Int>> =
     File(Resources.url(name).substringAfter(':')).useLines { lines ->
         lines.drop(3)
             .filter { it.isNotBlank() }
             .map {
-                val listOfList = it.split(" ").filter { it.isNotBlank() }.map { it.toDouble() }.chunked(16)
-                doubleArray2D(16, 16) { x, y -> listOfList[y][x] }
+                val row = it.split(" ").filter { it.isNotBlank() }.map { it.toDouble() }
+                val image = row.chunked(16)
+                val label = row.last().toInt()
+                doubleArray2D(16, 16) { x, y -> image[y][x] } to label
             }.toList()
     }
